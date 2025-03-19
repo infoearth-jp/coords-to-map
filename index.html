@@ -70,7 +70,7 @@
 </head>
 <body>
 
-    <h2>🌈 座標を入力してポリゴン or ラインを描画 💖</h2>
+    <h2>座標を入力してポリゴン or ラインを描画</h2>
 
     <div class="tabs">
         <button class="tab active" id="tab2D" onclick="switchTab('2D')">2D（[lon, lat]）</button>
@@ -83,7 +83,7 @@
     
     <div id="map"></div>
     <br><br>
-    <div>&#xA9;OpenStreetMap<br /><a href="https://www.openstreetmap.org/copyright">著作権について</a></div>
+    <div>&#xA9;OpenStreetMap<br /><a href="https://www.openstreetmap.org/copyright" target="_blank">著作権について</a></div>
 
     <script>
         let mode = "2D"; // 初期モードは2D
@@ -109,7 +109,7 @@
 
         function drawShape() {
             const input = document.getElementById("coordsInput").value.trim();
-            if (!input) return alert("💖 座標を入力してね！💖");
+            if (!input) return alert("座標を入力してください！");
 
             try {
                 let coordArray;
@@ -118,28 +118,28 @@
                 if (input.startsWith("[") && input.endsWith("]")) {
                     coordArray = JSON.parse(input);
                 } else {
-                    return alert("⚠️ JSON形式で入力してね！例: [139.7,35.6],[139.8,35.7] 💖");
+                    return alert("⚠️ JSON形式で入力してください！例: [139.7,35.6],[139.8,35.7] ");
                 }
 
                 // 📌 データが正しく配列になっているかチェック
                 if (!Array.isArray(coordArray) || coordArray.length === 0) {
-                    return alert("⚠️ 座標データが空っぽみたい！💖");
+                    return alert("⚠️ 座標データが空です！");
                 }
 
                 let coords = [];
                 if (mode === "2D") {
                     if (!coordArray.every(point => Array.isArray(point) && point.length === 2 && point.every(num => typeof num === "number"))) {
-                        return alert("⚠️ 2D座標は [lon, lat] のペアで入力してね！💖");
+                        return alert("⚠️ 2D座標は [lon, lat] のペアで入力してください！");
                     }
                     coords = coordArray.map(point => [point[1], point[0]]); // [lon, lat] → [lat, lon]
                 } else { // 3Dモード
                     if (!coordArray.every(point => Array.isArray(point) && point.length === 3 && point.every(num => typeof num === "number"))) {
-                        return alert("⚠️ 3D座標は [lon, lat, alt] のセットで入力してね！💖");
+                        return alert("⚠️ 3D座標は [lon, lat, alt] のセットで入力してください！");
                     }
                     coords = coordArray.map(point => [point[1], point[0]]); // [lon, lat, alt] → [lat, lon]
                 }
 
-                if (coords.length < 2) return alert("📍 2点以上の座標を入力してね！📍");
+                if (coords.length < 2) return alert(" 2点以上の座標を入力してください！");
 
                 // 🔄 既存の図形を削除
                 if (drawnLayer) map.removeLayer(drawnLayer);
@@ -155,7 +155,7 @@
                 map.fitBounds(drawnLayer.getBounds());
 
             } catch (e) {
-                alert("⚠️ JSON形式が正しくないみたい！エラー内容：" + e.message + " 💖");
+                alert("⚠️ JSON形式が不正です！エラー内容：" + e.message);
             }
         }
     </script>
