@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ポリゴン＆ライン描画アプリ💖</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #fff0f5;
+            text-align: center;
+            margin: 20px;
+        }
+        h2 {
+            color: #ff69b4;
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            background: #ff69b4;
+            border: none;
+            border-radius: 20px;
+            margin: 0 5px;
+            transition: 0.3s;
+        }
+        .tab.active {
+            background: #ff1493;
+        }
+        textarea {
+            width: 80%;
+            height: 100px;
+            border: 2px solid #ff69b4;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 14px;
+            background-color: #fff;
+        }
+        button {
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: linear-gradient(135deg, #ff1493, #ff69b4);
+            transform: scale(1.05);
+        }
+        #map {
+            width: 80%;
+            height: 500px;
+            margin: 20px auto;
+            border: 3px solid #ff69b4;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🌈 座標を入力してポリゴン or ラインを描画 💖</h2>
+
+    <div class="tabs">
+        <button class="tab active" id="tab2D" onclick="switchTab('2D')">2D（[lon, lat]）</button>
+        <button class="tab" id="tab3D" onclick="switchTab('3D')">3D（[lon, lat, alt]）</button>
+    </div>
+
+    <textarea id="coordsInput" placeholder="[ [lon,lat], [lon,lat], [lon,lat] ]"></textarea>
+    <br><br>
+    <button onclick="drawShape()">✨ 描画する ✨</button>
+    
+    <div id="map"></div>
+    <br><br>
+    <div>&#xA9;OpenStreetMap<br /><a href="https://www.openstreetmap.org/copyright">著作権について</a></div>
+
+    <script>
+        let mode = "2D"; // 初期モードは2D
+        let drawnLayer;
+
+        // 🌍 地図の初期化
+        const map = L.map('map').setView([35.6895, 139.6917], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        function switchTab(selectedMode) {
+            mode = selectedMode;
+            document.getElementById("tab2D").classList.toggle("active", mode === "2D");
+            document.getElementById("tab3D").classList.toggle("active", mode === "3D");
+            // プレースホルダーを変更
+            document.getElementById("coordsInput").placeholder = mode === "2D" 
+                ? "[ [lon,lat], [lon,lat], [lon,lat] ]" 
+                : "[ [lon,lat,alt], [lon,lat,alt], [lon,lat,alt] ]";
+            
+            document.getElementById("coordsInput").value = "";
+        }
+
+        function drawShape() {
+            const input = document.getElementById("coordsInput").value.trim();
+            if (!input) return alert("💖 座標を入力してね！💖");
+
+            try {
+                let coordArray;
+
+                // 📌 JSONとして正しくパースする（そのまま or 手動で配列化）
+                if (input.startsWith("[") && input.endsWith("]")) {
+                    coordArray = JSON.parse(input);
+                } else {
+                    return alert("⚠️ JSON形式で入力してね！例: [139.7,35.6],[139.8,35.7] 💖");
+                }
+
+                // 📌 データが正しく配列になっているかチェック
+                if (!Array.isArray(coordArray) || coordArray.length === 0) {
+                    return alert("⚠️ 座標データが空っぽみたい！💖");
+                }
+
+                let coords = [];
+                if (mode === "2D") {
+                    if (!coordArray.every(point => Array.isArray(point) && point.length === 2 && point.every(num => typeof num === "number"))) {
+                        return alert("⚠️ 2D座標は [lon, lat] のペアで入力してね！💖");
+                    }
+                    coords = coordArray.map(point => [point[1], point[0]]); // [lon, lat] → [lat, lon]
+                } else { // 3Dモード
+                    if (!coordArray.every(point => Array.isArray(point) && point.length === 3 && point.every(num => typeof num === "number"))) {
+                        return alert("⚠️ 3D座標は [lon, lat, alt] のセットで入力してね！💖");
+                    }
+                    coords = coordArray.map(point => [point[1], point[0]]); // [lon, lat, alt] → [lat, lon]
+                }
+
+                if (coords.length < 2) return alert("📍 2点以上の座標を入力してね！📍");
+
+                // 🔄 既存の図形を削除
+                if (drawnLayer) map.removeLayer(drawnLayer);
+
+                // 🟢 ポリゴン or 🔵 ラインを判定して描画
+                if (JSON.stringify(coords[0]) === JSON.stringify(coords[coords.length - 1])) {
+                    drawnLayer = L.polygon(coords, { color: "#ff1493" }).addTo(map);
+                } else {
+                    drawnLayer = L.polyline(coords, { color: "#007bff" }).addTo(map);
+                }
+
+                // 🗺️ 表示範囲を自動調整
+                map.fitBounds(drawnLayer.getBounds());
+
+            } catch (e) {
+                alert("⚠️ JSON形式が正しくないみたい！エラー内容：" + e.message + " 💖");
+            }
+        }
+    </script>
+
+</body>
+</html>
