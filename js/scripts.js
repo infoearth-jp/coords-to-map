@@ -1,11 +1,14 @@
 let mode = "2D";
 let drawnLayer;
+let map;
 
-// 地図の初期化
-const map = L.map('map').setView([35.6895, 139.6917], 13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
+function initMap(){
+    // 地図の初期化
+    map = L.map('map').setView([35.6895, 139.6917], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+}
 
 function switchTab(selectedMode) {
     mode = selectedMode;
@@ -20,7 +23,8 @@ function switchTab(selectedMode) {
 }
 
 function drawShape() {
-    const input = document.getElementById("coordsInput").value.trim();
+    const tmpInput = document.getElementById("coordsInput").value.trim();
+    const input = sanitizeLonLat(tmpInput);
     if (!input) return alert("座標を入力してください！");
 
     try {
@@ -70,3 +74,8 @@ function drawShape() {
         alert("⚠️ JSON形式が不正です！エラー内容：" + e.message);
     }
 }
+
+function sanitizeLonLat(lonlat){
+    const pattern = /[^[.,0-9\]]/g;
+    return lonlat.replaceAll(pattern, "");
+};

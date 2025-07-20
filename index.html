@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ポリゴン＆ライン描画アプリ💖</title>
+    <title>ポリゴン＆ライン描画アプリ</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="./css/styles.css" />
+    <link rel="stylesheet" href="css/styles.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="./js/scripts.js"></script>
+    <script type="text/javascript" src="./js/scripts.js"></script>
 </head>
 <body>
     <h2>座標を入力してポリゴン or ラインを描画</h2>
@@ -19,10 +19,14 @@
 
     <textarea id="coordsInput" placeholder="[ [lon,lat], [lon,lat], [lon,lat] ]"></textarea>
     <br><br>
-    <button onclick="drawShape()">✨ 描画する ✨</button>
+    <button onclick="drawShape()">描画する</button>
     
     <div id="map"></div>
     <br><br>
-    <div>&#xA9;OpenStreetMap<br /><a href="https://www.openstreetmap.org/copyright" target="_blank">OSMの著作権について</a></div>
+    <div><a href="https://www.openstreetmap.org/copyright" target="_blank">OSMの著作権について</a></div>
+
+    <script>
+      initMap();
+    </script>
 </body>
 </html>
