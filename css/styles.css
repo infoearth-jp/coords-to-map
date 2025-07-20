@@ -1,0 +1,59 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #fff0f5;
+    text-align: center;
+    margin: 20px;
+}
+h2 {
+    color: #ff69b4;
+}
+.tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    background: #ff69b4;
+    border: none;
+    border-radius: 20px;
+    margin: 0 5px;
+    transition: 0.3s;
+}
+.tab.active {
+    background: #ff1493;
+}
+textarea {
+    width: 80%;
+    height: 100px;
+    border: 2px solid #ff69b4;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 14px;
+    background-color: #fff;
+}
+button {
+    background: linear-gradient(135deg, #ff69b4, #ff1493);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+button:hover {
+    background: linear-gradient(135deg, #ff1493, #ff69b4);
+    transform: scale(1.05);
+}
+#map {
+    width: 80%;
+    height: 500px;
+    margin: 20px auto;
+    border: 3px solid #ff69b4;
+    border-radius: 10px;
+}
