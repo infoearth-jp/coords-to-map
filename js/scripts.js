@@ -39,13 +39,29 @@ function drawShape() {
 
 function drawShapeFromGeojson(){
     const tmpInput = document.getElementById("coordsInput").value.trim();
-    const input = sanitizeGeojson(tmpInput);
+    let input = sanitizeGeojson(tmpInput);
+    // "type": "Feature"なら"type": "FeatureCollection"に変換
+    input.replace(/"type":\s*"Feature"/g, '"type": "FeatureCollection"');
+    // "properties":{}なら"properties": {"color": "#ff1493"}に変換
+    input = input.replace(/"properties":\{\}/g, '"properties": {"color": "#ff1493"}');
     if (!input) return alert("座標を入力してください！");
 
     try {
         let geojsonData = JSON.parse(input);
-        if (!geojsonData || !geojsonData.features || geojsonData.features.length === 0) {
+        if (!geojsonData) {
             return alert("⚠️ 有効なGeoJSONデータを入力してください！");
+        }
+
+        if (!geojsonData.features && geojsonData.geometry) {
+            // GeoJSONが単一のジオメトリの場合、FeatureCollectionに変換
+            geojsonData = {
+                type: "FeatureCollection",
+                features: [{
+                    type: "Feature",
+                    geometry: geojsonData.geometry,
+                    properties: geojsonData.properties || { color: "#ff1493" }
+                }]
+            };
         }
 
         // 🔄 既存の図形を削除
