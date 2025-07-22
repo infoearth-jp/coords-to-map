@@ -2,6 +2,8 @@ let mode = "2D";
 let drawnLayer;
 let map;
 
+// let gpxParser = require('gpxparser');
+
 function initMap(){
     // 地図の初期化
     map = L.map('map').setView([35.6895, 139.6917], 13);
@@ -15,14 +17,18 @@ function switchTab(selectedMode) {
     document.getElementById("tab2D").classList.toggle("active", mode === "2D");
     document.getElementById("tab3D").classList.toggle("active", mode === "3D");
     document.getElementById("tabGeoJSON").classList.toggle("active", mode === "GeoJSON");
+    document.getElementById("tabGPX").classList.toggle("active", mode === "GPX");
     // プレースホルダーを変更
     if (mode === "2D") {
         document.getElementById("coordsInput").placeholder = "[ [lon,lat], [lon,lat], [lon,lat] ]";
     } else if (mode === "3D") {
         document.getElementById("coordsInput").placeholder = "[ [lon,lat,alt], [lon,lat,alt], [lon,lat,alt] ]";
-    } else {
+    } else if (mode === "GeoJSON") {
         document.getElementById("coordsInput").placeholder = "GeoJSON形式で入力してください";
+    } else if (mode === "GPX") {
+        document.getElementById("coordsInput").placeholder = "GPX形式で入力してください";
     }
+    // 入力フィールドをクリア
     
     document.getElementById("coordsInput").value = "";
 }
@@ -32,8 +38,10 @@ function drawShape() {
         drawShapeFrom2dCoods();
     } else if (mode === "3D") {
         drawShapeFrom3dCoods();
-    } else {
+    } else if (mode === "GeoJSON") {
         drawShapeFromGeojson();
+    } else if (mode === "GPX") {
+        drawShapeFromGpx();
     }
 }
 
@@ -154,17 +162,49 @@ function drawShapeFrom3dCoods(){
     } catch (e) {
         alert("⚠️ JSON形式が不正です！エラー内容：" + e.message);
     }
-}
+};
+
+function drawShapeFromGpx(){
+    const tmpInput = document.getElementById("coordsInput").value.trim();
+    const input = sanitizeGpx(tmpInput);
+    if (!input) return alert("GPXデータを入力してください！");
+    // GPXのパース処理を追加
+    let parser = new gpxParser();
+    parser.parse(input);
+    try {
+        let geojsonData = parser.toGeoJSON();
+        if (!geojsonData || !geojsonData.features || geojsonData.features.length === 0) {
+            return alert("⚠️ 有効なGPXデータを入力してください！");
+        }
+
+        // 🔄 既存の図形を削除
+        if (drawnLayer) map.removeLayer(drawnLayer);
+
+        // 🗺️ GeoJSONを地図に追加
+        drawnLayer = L.geoJSON(geojsonData, {
+            style: function(feature) {
+                return { color: feature.properties.color || "#007bff" };
+            }
+        }).addTo(map);
+
+        // 🗺️ 表示範囲を自動調整
+        map.fitBounds(drawnLayer.getBounds());
+
+    } catch (e) {
+        alert("⚠️ GPX形式が不正です！エラー内容：" + e.message);
+    }
+};
 
 function sanitizeLonLat(lonlat){
     const pattern = /[^[.,0-9\]]/g;
     return lonlat.replaceAll(pattern, "");
-}
+};
 
 function sanitizeGeojson(geojson){
-    // allow only valid GeoJSON characters
-    // This regex allows alphabet, numbers, spaces, commas, brackets, and dots
     const pattern = /[^a-zA-Z0-9\{\}\"\'\[\]\:\#\,\.\s]/g;
     return geojson.replaceAll(pattern, "");
-    // return geojson;
-}
+};
+
+function sanitizeGpx(gpx){
+    return gpx;
+};
